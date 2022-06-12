@@ -1,4 +1,4 @@
-FROM circleci/openjdk:11-jdk
+FROM openjdk:11
 COPY ./build/libs/*.jar /usr/app/
 WORKDIR /usr/app
 EXPOSE 8088
