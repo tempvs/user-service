@@ -9,3 +9,6 @@ app:
   base-url: http://localhost:8080
 authorization:
   token: security_token
+email:
+  service:
+    url: ${EMAIL_SERVICE_URL:localhost:8081}

@@ -1,14 +1,13 @@
 package club.tempvs.user.component;
 
-import club.tempvs.user.amqp.EmailEventProcessor;
 import club.tempvs.user.dto.EmailDto;
+import club.tempvs.user.http.EmailHttpClient;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.stereotype.Component;
-import org.springframework.messaging.support.MessageBuilder;
 
 import java.util.Locale;
 
@@ -24,7 +23,7 @@ public class EmailSender {
 
     private final MessageSource messageSource;
     private final EmailBuilder emailBuilder;
-    private final EmailEventProcessor emailEventProcessor;
+    private final EmailHttpClient emailHttpClient;
 
     @Setter
     @Value("${app.base-url}")
@@ -40,7 +39,7 @@ public class EmailSender {
 
         EmailDto emailPayload = new EmailDto(email, subject, body);
 
-        emailEventProcessor.send()
-                .send(MessageBuilder.withPayload(emailPayload).build());
+        //TODO: implement outbox
+        emailHttpClient.post(emailPayload);
     }
 }

@@ -1,6 +1,7 @@
 package club.tempvs.user.component;
 
-import club.tempvs.user.amqp.EmailEventProcessor;
+import club.tempvs.user.dto.EmailDto;
+import club.tempvs.user.http.EmailHttpClient;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -9,8 +10,6 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
-import org.springframework.messaging.Message;
-import org.springframework.messaging.MessageChannel;
 
 import java.util.Locale;
 
@@ -29,10 +28,7 @@ public class EmailSenderTest {
     @Mock
     private EmailBuilder emailBuilder;
     @Mock
-    private EmailEventProcessor emailEventProcessor;
-
-    @Mock
-    private MessageChannel messageChannel;
+    private EmailHttpClient emailHttpClient;
 
     @BeforeAll
     public static void setUp() {
@@ -41,6 +37,7 @@ public class EmailSenderTest {
 
     @Test
     public void testSendRegistrationVerification() {
+        //given
         String email = "test@email.com";
         String subject = "user.registration.email.subject";
         String bodyMessage = "user.registration.email.body.message";
@@ -49,19 +46,20 @@ public class EmailSenderTest {
         emailSender.setBaseUrl(baseUrl);
         String verificationId = "verificationId";
         String link = baseUrl + "/user/registration/" + verificationId;
-        String emailBody = "body";
+        String body = "body";
+        EmailDto payload = new EmailDto(email, subject, body);
 
         when(messageSource.getMessage(subject, null, subject, locale)).thenReturn(subject);
         when(messageSource.getMessage(bodyMessage, null, bodyMessage, locale)).thenReturn(bodyMessage);
         when(messageSource.getMessage(buttonText, null, buttonText, locale)).thenReturn(buttonText);
-        when(emailBuilder.buildRegistrationVerification(bodyMessage, link, buttonText)).thenReturn(emailBody);
-        when(emailEventProcessor.send()).thenReturn(messageChannel);
+        when(emailBuilder.buildRegistrationVerification(bodyMessage, link, buttonText)).thenReturn(body);
 
+        //when
         emailSender.sendRegistrationVerification(email, verificationId);
 
+        //then
         verify(emailBuilder).buildRegistrationVerification(bodyMessage, link, buttonText);
-        verify(messageChannel).send(any(Message.class));
-        verify(emailEventProcessor).send();
-        verifyNoMoreInteractions(messageChannel);
+        verify(emailHttpClient).post(payload);
+        verifyNoMoreInteractions(emailBuilder, emailHttpClient);
     }
 }
