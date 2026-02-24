@@ -7,8 +7,6 @@ import club.tempvs.user.exception.UserAlreadyExistsException;
 import club.tempvs.user.repository.EmailVerificationRepository;
 import club.tempvs.user.domain.EmailVerification;
 import club.tempvs.user.service.EmailVerificationService;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
@@ -49,9 +47,6 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
     @Override
     @Transactional
-    @HystrixCommand(commandProperties = {
-            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE")
-    })
     public void cleanupDayBack() {
         Duration day = Duration.ofDays(1);
         Instant retentionTime = Instant.now().minus(day);

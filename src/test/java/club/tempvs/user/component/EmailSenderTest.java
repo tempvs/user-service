@@ -1,12 +1,12 @@
 package club.tempvs.user.component;
 
 import club.tempvs.user.amqp.EmailEventProcessor;
-import org.junit.BeforeClass;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.MessageSource;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.messaging.Message;
@@ -16,7 +16,7 @@ import java.util.Locale;
 
 import static org.mockito.Mockito.*;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EmailSenderTest {
 
     private static final Locale locale = Locale.ENGLISH;
@@ -34,7 +34,7 @@ public class EmailSenderTest {
     @Mock
     private MessageChannel messageChannel;
 
-    @BeforeClass
+    @BeforeAll
     public static void setUp() {
         LocaleContextHolder.setLocale(locale);
     }

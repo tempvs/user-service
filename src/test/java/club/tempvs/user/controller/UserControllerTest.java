@@ -1,21 +1,23 @@
 package club.tempvs.user.controller;
 
-import static org.mockito.Mockito.*;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import club.tempvs.user.domain.User;
 import club.tempvs.user.dto.CredentialsDto;
 import club.tempvs.user.service.EmailVerificationService;
 import club.tempvs.user.service.UserService;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.convert.ConversionService;
 
 import javax.servlet.http.HttpServletResponse;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UserControllerTest {
 
     private static final String REFRESH_COOKIES_HEADER = "Tempvs-Refresh-Cookies";
