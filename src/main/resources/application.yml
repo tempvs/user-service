@@ -1,0 +1,11 @@
+server:
+  port: 8088
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tempvs-user
+    username: postgres
+    password: pass
+app:
+  base-url: http://localhost:8080
+authorization:
+  token: security_token
