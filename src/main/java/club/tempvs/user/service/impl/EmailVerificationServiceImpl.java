@@ -12,10 +12,10 @@ import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.bind.DatatypeConverter;
 import java.security.MessageDigest;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HexFormat;
 
 @Service
 @RequiredArgsConstructor
@@ -38,7 +38,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         String verificationSequence = email + Instant.now().toEpochMilli();
         MessageDigest digest = MessageDigest.getInstance(DIGEST_ALGORITHM);
         digest.update(verificationSequence.getBytes());
-        String verificationId = DatatypeConverter.printHexBinary(digest.digest());
+        String verificationId = HexFormat.of().formatHex(digest.digest()).toUpperCase();;
 
         emailSender.sendRegistrationVerification(email, verificationId);
         EmailVerification verification = new EmailVerification(email, verificationId);
