@@ -2,8 +2,10 @@ server:
   port: 8088
 spring:
   datasource:
-    url: jdbc:postgresql://ec2-52-213-224-253.eu-west-1.compute.amazonaws.com:5432/d2dhc0js9k3v9e?sslmode=require
-    username: rafpqrhgwxhoru
-    password: 3387786d6345b757c854dc19a315b66fef5952597cda08413227036386157f6a
+    url: jdbc:postgresql://localhost:5432/tempvs-user
+    username: postgres
+    password: pass
 app:
   base-url: http://localhost:8080
+authorization:
+  token: security_token
