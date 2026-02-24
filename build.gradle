@@ -60,7 +60,7 @@ dependencies {
     liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
     liquibaseRuntime sourceSets.main.output
 	//testing
-	testRuntime 'com.h2database:h2:1.4.194'
+	testRuntimeOnly 'com.h2database:h2:1.4.194'
 	testImplementation  'org.springframework.cloud:spring-cloud-stream-test-support'
 }
 
@@ -94,5 +94,5 @@ task integrationTest(type: Test) {
 
 configurations {
 	integrationTestImplementation.extendsFrom testImplementation
-	integrationTestRuntime.extendsFrom testRuntime
+	integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
 }
