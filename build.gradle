@@ -36,8 +36,8 @@ liquibase {
 	activities {
 		main {
 			changelogFile 'src/main/resources/db/changelog/changes/base.yml'
-			url 'jdbc:postgresql://localhost:5432/tempvs-user'
-			referenceUrl 'hibernate:spring:club.tempvs.user.domain?dialect=org.hibernate.dialect.PostgreSQLDialect'
+			url 'jdbc:postgresql://localhost:5432/tempvs_user'
+			referenceUrl 'hibernate:spring:club.tempvs.user.domain?dialect=org.hibernate.dialect.PostgreSQLDialect&hibernate.physical_naming_strategy=org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy'
 			username 'postgres'
 			password 'pass'
 		}
@@ -80,7 +80,6 @@ dependencies {
 	testImplementation "io.zonky.test:embedded-database-spring-test:${zonkyTestVersion}"
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.springframework.boot:spring-boot-webmvc-test'
-	testImplementation 'org.springframework.boot:spring-boot-test-autoconfigure'
 }
 
 bootJar {
