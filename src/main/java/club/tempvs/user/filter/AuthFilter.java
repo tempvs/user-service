@@ -2,7 +2,6 @@ package club.tempvs.user.filter;
 
 import club.tempvs.user.dto.TempvsPrincipal;
 import club.tempvs.user.token.AuthToken;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.i18n.LocaleContextHolder;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -11,12 +10,14 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.GenericFilterBean;
 
-import javax.servlet.FilterChain;
-import javax.servlet.ServletException;
-import javax.servlet.ServletRequest;
-import javax.servlet.ServletResponse;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
+import jakarta.servlet.FilterChain;
+import jakarta.servlet.ServletException;
+import jakarta.servlet.ServletRequest;
+import jakarta.servlet.ServletResponse;
+import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+import tools.jackson.databind.json.JsonMapper;
+
 import java.io.IOException;
 import java.util.Locale;
 import java.util.Optional;
@@ -30,7 +31,7 @@ public class AuthFilter extends GenericFilterBean {
 
     private static final String USER_INFO_HEADER = "User-Info";
 
-    private final ObjectMapper objectMapper;
+    private final JsonMapper jsonMapper;
 
     @Override
     public void doFilter(ServletRequest request, ServletResponse response,
@@ -42,7 +43,7 @@ public class AuthFilter extends GenericFilterBean {
         if (!StringUtils.isEmpty(userInfoHeaderValue)) {
             httpResponse.setHeader(USER_INFO_HEADER, userInfoHeaderValue);
 
-            TempvsPrincipal principal = objectMapper.readValue(userInfoHeaderValue, TempvsPrincipal.class);
+            TempvsPrincipal principal = jsonMapper.readValue(userInfoHeaderValue, TempvsPrincipal.class);
             Set<String> roles = principal.getRoles();
             Set<SimpleGrantedAuthority> authorities = roles.stream()
                     .map(SimpleGrantedAuthority::new)

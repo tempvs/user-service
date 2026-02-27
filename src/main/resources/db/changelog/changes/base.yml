@@ -1,13 +1,14 @@
 databaseChangeLog:
 - changeSet:
-    id: 1570124653014-1
-    author: albvs (generated)
+    id: 1772147116887-1
+    author: anton (generated)
     changes:
     - createTable:
         columns:
         - column:
             autoIncrement: true
             constraints:
+              nullable: false
               primaryKey: true
               primaryKeyName: app_userPK
             name: id
@@ -38,8 +39,8 @@ databaseChangeLog:
             type: VARCHAR(255)
         tableName: app_user
 - changeSet:
-    id: 1570124653014-2
-    author: albvs (generated)
+    id: 1772147116887-2
+    author: anton (generated)
     changes:
     - createTable:
         columns:
@@ -53,21 +54,22 @@ databaseChangeLog:
             type: VARCHAR(255)
         tableName: app_user_roles
 - changeSet:
-    id: 1570124653014-3
-    author: albvs (generated)
+    id: 1772147116887-3
+    author: anton (generated)
     changes:
     - createTable:
         columns:
         - column:
             autoIncrement: true
             constraints:
+              nullable: false
               primaryKey: true
               primaryKeyName: email_verificationPK
             name: id
             type: BIGINT
         - column:
             name: created_date
-            type: TIMESTAMP WITHOUT TIME ZONE
+            type: TIMESTAMP(6) WITH TIME ZONE
         - column:
             name: email
             type: VARCHAR(255)
@@ -76,16 +78,16 @@ databaseChangeLog:
             type: VARCHAR(255)
         tableName: email_verification
 - changeSet:
-    id: 1570124653014-4
-    author: albvs (generated)
+    id: 1772147116887-4
+    author: anton (generated)
     changes:
     - addUniqueConstraint:
         columnNames: email
         constraintName: UC_APP_USEREMAIL_COL
         tableName: app_user
 - changeSet:
-    id: 1570124653014-5
-    author: albvs (generated)
+    id: 1772147116887-5
+    author: anton (generated)
     changes:
     - addForeignKeyConstraint:
         baseColumnNames: app_user_id

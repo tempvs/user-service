@@ -7,17 +7,15 @@ import club.tempvs.user.exception.UserAlreadyExistsException;
 import club.tempvs.user.repository.EmailVerificationRepository;
 import club.tempvs.user.domain.EmailVerification;
 import club.tempvs.user.service.EmailVerificationService;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
-import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import lombok.RequiredArgsConstructor;
 import lombok.SneakyThrows;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import javax.xml.bind.DatatypeConverter;
 import java.security.MessageDigest;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.HexFormat;
 
 @Service
 @RequiredArgsConstructor
@@ -40,7 +38,7 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
         String verificationSequence = email + Instant.now().toEpochMilli();
         MessageDigest digest = MessageDigest.getInstance(DIGEST_ALGORITHM);
         digest.update(verificationSequence.getBytes());
-        String verificationId = DatatypeConverter.printHexBinary(digest.digest());
+        String verificationId = HexFormat.of().formatHex(digest.digest()).toUpperCase();;
 
         emailSender.sendRegistrationVerification(email, verificationId);
         EmailVerification verification = new EmailVerification(email, verificationId);
@@ -49,9 +47,6 @@ public class EmailVerificationServiceImpl implements EmailVerificationService {
 
     @Override
     @Transactional
-    @HystrixCommand(commandProperties = {
-            @HystrixProperty(name = "execution.isolation.strategy", value = "SEMAPHORE")
-    })
     public void cleanupDayBack() {
         Duration day = Duration.ofDays(1);
         Instant retentionTime = Instant.now().minus(day);

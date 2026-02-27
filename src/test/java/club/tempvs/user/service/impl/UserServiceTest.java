@@ -6,21 +6,23 @@ import club.tempvs.user.domain.EmailVerification;
 import club.tempvs.user.domain.User;
 import club.tempvs.user.exception.UnauthorizedException;
 import club.tempvs.user.exception.UserAlreadyExistsException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import static org.junit.Assert.assertEquals;
-import static org.mockito.Mockito.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class UserServiceTest {
 
     @InjectMocks
@@ -65,7 +67,7 @@ public class UserServiceTest {
         assertEquals("User object is returned", user, result);
     }
 
-    @Test(expected = UserAlreadyExistsException.class)
+    @Test
     public void testRegisterForDuplicate() {
         String verificationId = "verification id";
         String email = "test@email.com";
@@ -76,7 +78,9 @@ public class UserServiceTest {
         when(emailVerification.getEmail()).thenReturn(email);
         when(userDao.get(email)).thenReturn(Optional.of(user));
 
-        userService.register(verificationId, password);
+        assertThrows(UserAlreadyExistsException.class, () -> {
+            userService.register(verificationId, password);
+        });
     }
 
     @Test
@@ -99,7 +103,7 @@ public class UserServiceTest {
         assertEquals("User object is returned", user, result);
     }
 
-    @Test(expected = UnauthorizedException.class)
+    @Test
     public void testLoginForWrongCredentials() {
         String email = "email@test.com";
         String password = "password";
@@ -110,10 +114,12 @@ public class UserServiceTest {
         when(user.getPassword()).thenReturn(encodedPassword);
         when(passwordEncoder.matches(password, encodedPassword)).thenReturn(false);
 
-        userService.login(email, password);
+        assertThrows(UnauthorizedException.class, () -> {
+            userService.login(email, password);
+        });
     }
 
-    @Test(expected = NoSuchElementException.class)
+    @Test
     public void testLoginForMissingUser() {
         String email = "email@test.com";
         String password = "password";
@@ -121,6 +127,8 @@ public class UserServiceTest {
 
         when(userDao.get(email)).thenReturn(userOptional);
 
-        userService.login(email, password);
+        assertThrows(NoSuchElementException.class, () -> {
+            userService.login(email, password);
+        });
     }
 }

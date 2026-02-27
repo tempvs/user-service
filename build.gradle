@@ -1,13 +1,24 @@
+buildscript {
+	dependencies {
+		classpath 'org.liquibase:liquibase-core:4.33.0'
+	}
+}
+
 plugins {
-	id 'org.springframework.boot' version '2.2.1.RELEASE'
-	id 'io.spring.dependency-management' version '1.0.7.RELEASE'
-	id 'org.liquibase.gradle' version '2.0.1'
+	id 'org.springframework.boot' version '4.0.3'
+	id 'io.spring.dependency-management' version '1.1.7'
+	id 'org.liquibase.gradle' version '3.1.0'
 	id 'java'
 }
 
 group = 'club.tempvs'
 version = '0.0.1-SNAPSHOT'
-sourceCompatibility = '11'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(25)
+	}
+}
 
 configurations {
 	compileOnly {
@@ -20,54 +31,55 @@ repositories {
 	maven { url 'https://repo.spring.io/milestone' }
 }
 
-ext {
-	set('springCloudVersion', "Hoxton.RC2")
-}
-
 liquibase {
+	runList = "main"
 	activities {
 		main {
-			changeLogFile 'src/main/resources/db/changelog/changes/' + System.getenv('LIQUIBASE_DIFF_FILENAME')
-			url System.getenv('JDBC_DATABASE_URL')
-			referenceUrl 'hibernate:spring:club.tempvs.user.domain?dialect=org.hibernate.dialect.PostgreSQL95Dialect&hibernate.physical_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringPhysicalNamingStrategy&hibernate.implicit_naming_strategy=org.springframework.boot.orm.jpa.hibernate.SpringImplicitNamingStrategy'
-			username System.getenv('JDBC_DATABASE_USERNAME')
-			password System.getenv('JDBC_DATABASE_PASSWORD')
+			changelogFile 'src/main/resources/db/changelog/changes/base.yml'
+			url 'jdbc:postgresql://localhost:5432/tempvs_user'
+			referenceUrl 'hibernate:spring:club.tempvs.user.domain?dialect=org.hibernate.dialect.PostgreSQLDialect&hibernate.physical_naming_strategy=org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy'
+			username 'postgres'
+			password 'pass'
 		}
 	}
 }
 
 diff.dependsOn compileJava
-diffChangeLog.dependsOn compileJava
 generateChangelog.dependsOn compileJava
+
+ext {
+	zonkyTestVersion = '2.7.1'
+	liquibaseVersion = '4.33.0'
+	hibernateVersion = '6.6.43.Final'
+}
 
 dependencies {
 	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
 	implementation 'org.springframework.boot:spring-boot-starter-thymeleaf'
 	implementation 'org.springframework.boot:spring-boot-starter-security'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
-	implementation 'org.springframework.cloud:spring-cloud-starter-netflix-hystrix'
-	implementation 'org.springframework.cloud:spring-cloud-starter-stream-rabbit'
-	implementation 'org.springframework.cloud:spring-cloud-stream-binder-rabbit'
+	implementation 'org.springframework.boot:spring-boot-starter-liquibase'
 	implementation "org.postgresql:postgresql"
 	//lombok
 	compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
     //liquibase
-    implementation "org.liquibase:liquibase-core" //to fire changelog migration on startup
-    liquibaseRuntime "org.liquibase:liquibase-core"
-    liquibaseRuntime "org.postgresql:postgresql"
-    liquibaseRuntime 'org.liquibase.ext:liquibase-hibernate5:3.6'
-    liquibaseRuntime 'org.springframework.boot:spring-boot-starter-data-jpa'
-    liquibaseRuntime sourceSets.main.output
-	//testing
-	testRuntime 'com.h2database:h2:1.4.194'
-	testImplementation  'org.springframework.cloud:spring-cloud-stream-test-support'
-}
-
-dependencyManagement {
-	imports {
-		mavenBom "org.springframework.cloud:spring-cloud-dependencies:${springCloudVersion}"
+	liquibaseRuntime "org.liquibase:liquibase-core:${liquibaseVersion}"
+	liquibaseRuntime "org.liquibase.ext:liquibase-hibernate6:${liquibaseVersion}"
+	liquibaseRuntime "info.picocli:picocli:4.7.6"
+	liquibaseRuntime "org.postgresql:postgresql"
+	liquibaseRuntime("org.springframework.boot:spring-boot-starter-data-jpa") {
+		exclude group: "org.hibernate.orm", module: "hibernate-core"
+		exclude group: "org.hibernate.orm", module: "hibernate-envers"
 	}
+	liquibaseRuntime "org.hibernate.orm:hibernate-core:${hibernateVersion}"
+	liquibaseRuntime "org.hibernate.orm:hibernate-envers:${hibernateVersion}"
+	liquibaseRuntime sourceSets.main.output
+	//testing
+	testImplementation "io.zonky.test:embedded-database-spring-test:${zonkyTestVersion}"
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.boot:spring-boot-webmvc-test'
 }
 
 bootJar {
@@ -75,24 +87,42 @@ bootJar {
 	archiveVersion = ''
 }
 
+tasks.named('test') {
+	useJUnitPlatform()
+}
+
 sourceSets {
 	integrationTest {
 		java {
-			compileClasspath += main.output + test.output
-			runtimeClasspath += main.output + test.output
-			srcDir file('src/integration-test/java')
+			srcDir 'src/integration-test/java'
 		}
-
-		resources.srcDir file('src/integration-test/resources')
+		resources {
+			srcDir 'src/integration-test/resources'
+		}
+		compileClasspath += sourceSets.main.output + configurations.testRuntimeClasspath
+		runtimeClasspath += output + compileClasspath
 	}
 }
 
-task integrationTest(type: Test) {
+tasks.register('integrationTest', Test) {
+	group = 'verification'
 	testClassesDirs = sourceSets.integrationTest.output.classesDirs
 	classpath = sourceSets.integrationTest.runtimeClasspath
+	outputs.upToDateWhen { false }
 }
 
 configurations {
 	integrationTestImplementation.extendsFrom testImplementation
-	integrationTestRuntime.extendsFrom testRuntime
+	integrationTestRuntimeOnly.extendsFrom testRuntimeOnly
+}
+
+configurations.liquibaseRuntime {
+	resolutionStrategy {
+		force "org.hibernate.orm:hibernate-core:${hibernateVersion}"
+		force "org.hibernate.orm:hibernate-envers:${hibernateVersion}"
+	}
+}
+
+tasks.named('integrationTest') {
+	useJUnitPlatform()
 }

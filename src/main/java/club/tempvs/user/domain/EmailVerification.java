@@ -1,22 +1,19 @@
 package club.tempvs.user.domain;
 
+import jakarta.persistence.*;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
-import javax.persistence.Entity;
-import javax.persistence.EntityListeners;
-import javax.persistence.GeneratedValue;
-import javax.persistence.Id;
-
 import java.time.Instant;
 
-import static javax.persistence.GenerationType.IDENTITY;
+import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Data
 @Entity
 @NoArgsConstructor
+@Table(name = "email_verification")
 @EntityListeners(AuditingEntityListener.class)
 public class EmailVerification {
 

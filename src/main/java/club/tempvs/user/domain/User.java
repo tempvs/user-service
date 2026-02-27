@@ -1,12 +1,17 @@
 package club.tempvs.user.domain;
 
-import static javax.persistence.GenerationType.IDENTITY;
-import static javax.persistence.FetchType.EAGER;
+import static jakarta.persistence.GenerationType.IDENTITY;
+import static jakarta.persistence.FetchType.EAGER;
 
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
-import javax.persistence.*;
+import jakarta.persistence.Id;
+import jakarta.persistence.Column;
+import jakarta.persistence.Entity;
+import jakarta.persistence.GeneratedValue;
+import jakarta.persistence.ElementCollection;
+
 import java.util.HashSet;
 import java.util.Set;
 

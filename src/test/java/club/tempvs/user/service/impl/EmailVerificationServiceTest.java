@@ -1,7 +1,13 @@
 package club.tempvs.user.service.impl;
 
-import static org.mockito.Mockito.*;
-import static org.junit.Assert.*;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.anyString;
+import static org.mockito.Mockito.when;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.springframework.test.util.AssertionErrors.assertEquals;
 
 import club.tempvs.user.component.EmailSender;
 import club.tempvs.user.dao.EmailVerificationDao;
@@ -9,15 +15,16 @@ import club.tempvs.user.dao.UserDao;
 import club.tempvs.user.domain.EmailVerification;
 import club.tempvs.user.domain.User;
 import club.tempvs.user.exception.UserAlreadyExistsException;
-import org.junit.Test;
-import org.junit.runner.RunWith;
+
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
-import org.mockito.junit.MockitoJUnitRunner;
+import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.Optional;
 
-@RunWith(MockitoJUnitRunner.class)
+@ExtendWith(MockitoExtension.class)
 public class EmailVerificationServiceTest {
 
     @InjectMocks
@@ -50,13 +57,15 @@ public class EmailVerificationServiceTest {
         assertEquals("Email verification object is returned", emailVerification, result);
     }
 
-    @Test(expected = UserAlreadyExistsException.class)
+    @Test
     public void testCreateForExisting() {
         String email = "test@email.com";
         Optional<User> userOptional = Optional.of(user);
 
         when(userDao.get(email)).thenReturn(userOptional);
 
-        emailVerificationService.create(email);
+        assertThrows(UserAlreadyExistsException.class, () -> {
+            emailVerificationService.create(email);
+        });
     }
 }
