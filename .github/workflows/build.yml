@@ -19,7 +19,7 @@ jobs:
         run: ./gradlew clean integrationTest
   build-image:
     needs: [integration-tests, unit-tests]
-    if: ${{ github.ref_name == 'main' }}
+    if: ${{ github.ref_name == 'master' }}
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
