@@ -2,31 +2,14 @@ name: Docker Image CI
 
 on:
   push:
-    branches: [ master ]
+    branches: ['**']
 
 jobs:
-
   build:
-
     runs-on: ubuntu-latest
-
     steps:
       - uses: actions/checkout@v2
       - name: Unit test
         run: ./gradlew clean test
       - name: Integration test
         run: ./gradlew clean integrationTest
-      - name: Assemble artifact
-        run: ./gradlew clean assemble
-      - name: Login to Heroku Container registry
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:login
-      - name: Build and push
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:push -a tempvs-user-stage web
-      - name: Release
-        env:
-          HEROKU_API_KEY: ${{ secrets.HEROKU_API_KEY }}
-        run: heroku container:release -a tempvs-user-stage web
