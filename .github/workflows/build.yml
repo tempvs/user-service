@@ -5,19 +5,15 @@ on:
     branches: ['**']
 
 jobs:
-  checkout:
-    runs-on: ubuntu-latest
-    steps:
-    - uses: actions/checkout@v2
   unit-tests:
     runs-on: ubuntu-latest
     steps:
-      #- uses: actions/checkout@v2
+      - uses: actions/checkout@v2
       - name: Unit test
         run: ./gradlew clean test
   integration-tests:
     runs-on: ubuntu-latest
     steps:
-      #- uses: actions/checkout@v2
+      - uses: actions/checkout@v2
       - name: Integration test
         run: ./gradlew clean integrationTest
