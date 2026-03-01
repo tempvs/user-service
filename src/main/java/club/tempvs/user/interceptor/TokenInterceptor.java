@@ -26,12 +26,18 @@ public class TokenInterceptor implements HandlerInterceptor {
         String authHeaderValue = request.getHeader(AUTHORIZATION_HEADER);
         byte[] tokenBytes = token.getBytes(CHAR_ENCODING);
         String tokenHash = DigestUtils.md5DigestAsHex(tokenBytes);
+        String requestUri = request.getRequestURI();
+        boolean isSwaggerPath = isSwaggerPath(requestUri);
 
-        if (authHeaderValue == null || !authHeaderValue.equals(tokenHash)) {
+        if ((authHeaderValue == null || !authHeaderValue.equals(tokenHash)) && !isSwaggerPath) {
             log.warn("Security token validation failed");
             throw new UnauthorizedException("Authentication failed. Wrong token is received.");
         }
 
         return true;
+    }
+
+    private boolean isSwaggerPath(String path) {
+        return path.contains("/v3/api-docs") || path.contains("swagger-ui");
     }
 }
