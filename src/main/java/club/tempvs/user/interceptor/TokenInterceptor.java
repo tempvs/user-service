@@ -1,6 +1,7 @@
 package club.tempvs.user.interceptor;
 
 import club.tempvs.user.exception.UnauthorizedException;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.DigestUtils;
@@ -9,6 +10,7 @@ import org.springframework.web.servlet.HandlerInterceptor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 
+@Slf4j
 @Component
 public class TokenInterceptor implements HandlerInterceptor {
 
@@ -26,6 +28,7 @@ public class TokenInterceptor implements HandlerInterceptor {
         String tokenHash = DigestUtils.md5DigestAsHex(tokenBytes);
 
         if (authHeaderValue == null || !authHeaderValue.equals(tokenHash)) {
+            log.warn("Security token validation failed");
             throw new UnauthorizedException("Authentication failed. Wrong token is received.");
         }
 
