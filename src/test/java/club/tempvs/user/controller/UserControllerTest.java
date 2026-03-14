@@ -6,6 +6,7 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import club.tempvs.user.domain.User;
 import club.tempvs.user.dto.CredentialsDto;
+import club.tempvs.user.dto.OAuthMeDto;
 import club.tempvs.user.service.EmailVerificationService;
 import club.tempvs.user.service.UserService;
 import org.junit.jupiter.api.Test;
@@ -14,6 +15,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -39,6 +41,8 @@ public class UserControllerTest {
     private HttpServletResponse httpServletResponse;
     @Mock
     private CredentialsDto credentialsDto;
+    @Mock
+    private OAuth2User oAuth2User;
 
     @Test
     public void testVerify() {
@@ -93,5 +97,26 @@ public class UserControllerTest {
 
         verify(httpServletResponse).addHeader(LOGOUT_HEADER, "");
         verifyNoMoreInteractions(httpServletResponse);
+    }
+
+    @Test
+    public void testOAuthMe() {
+        String externalId = "google-sub";
+        String email = "test@email.com";
+        String name = "Test User";
+
+        when(oAuth2User.getName()).thenReturn(externalId);
+        when(oAuth2User.getAttribute("email")).thenReturn(email);
+        when(oAuth2User.getAttribute("name")).thenReturn(name);
+
+        OAuthMeDto result = userController.me(oAuth2User);
+
+        verify(oAuth2User).getName();
+        verify(oAuth2User).getAttribute("email");
+        verify(oAuth2User).getAttribute("name");
+        verifyNoMoreInteractions(oAuth2User);
+        org.springframework.test.util.AssertionErrors.assertEquals("External id is returned", externalId, result.externalId());
+        org.springframework.test.util.AssertionErrors.assertEquals("Email is returned", email, result.email());
+        org.springframework.test.util.AssertionErrors.assertEquals("Name is returned", name, result.name());
     }
 }

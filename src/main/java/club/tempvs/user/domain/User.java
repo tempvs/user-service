@@ -25,6 +25,8 @@ public class User {
     private Long id;
     @Column(unique=true)
     private String email;
+    @Column(unique = true)
+    private String externalId;
     private String password;
     private Boolean accountNonExpired = Boolean.TRUE;
     private Boolean accountNonLocked = Boolean.TRUE;

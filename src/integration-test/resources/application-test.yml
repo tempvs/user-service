@@ -1,6 +1,17 @@
-zonky:
-  test:
-    database:
-      postgres:
-        docker:
-          image: postgres:18.2
+spring:
+  datasource:
+    url: jdbc:h2:mem:user-service-it;MODE=PostgreSQL;DATABASE_TO_LOWER=TRUE;DEFAULT_NULL_ORDERING=HIGH;DB_CLOSE_DELAY=-1
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
+  security:
+    oauth2:
+      client:
+        registration:
+          google:
+            client-id: test-client-id
+            client-secret: test-client-secret
+            redirect-uri: "{baseUrl}/api/user/login/oauth2/code/{registrationId}"
+  jpa:
+    hibernate:
+      ddl-auto: none

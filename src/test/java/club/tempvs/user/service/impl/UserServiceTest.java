@@ -17,8 +17,10 @@ import java.util.NoSuchElementException;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.when;
 import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
 import static org.springframework.test.util.AssertionErrors.assertEquals;
 
@@ -130,5 +132,74 @@ public class UserServiceTest {
         assertThrows(NoSuchElementException.class, () -> {
             userService.login(email, password);
         });
+    }
+
+    @Test
+    public void testCreateExternalUserForExistingExternalId() {
+        String externalId = "google-sub-1";
+        String email = "test@email.com";
+
+        when(userDao.getByExternalId(externalId)).thenReturn(Optional.of(user));
+
+        User result = userService.createExternalUser(externalId, email);
+
+        verify(userDao).getByExternalId(externalId);
+        verify(userDao, never()).get(email);
+        verify(userDao, never()).save(any(User.class));
+        assertEquals("User object is returned", user, result);
+    }
+
+    @Test
+    public void testCreateExternalUserForExistingEmail() {
+        String externalId = "google-sub-2";
+        String email = "test@email.com";
+
+        when(userDao.getByExternalId(externalId)).thenReturn(Optional.empty());
+        when(userDao.get(email)).thenReturn(Optional.of(user));
+        when(userDao.save(user)).thenReturn(user);
+
+        User result = userService.createExternalUser(externalId, email);
+
+        verify(userDao).getByExternalId(externalId);
+        verify(userDao).get(email);
+        verify(user).setExternalId(externalId);
+        verify(userDao).save(user);
+        assertEquals("User object is returned", user, result);
+    }
+
+    @Test
+    public void testCreateExternalUserForNewEmail() {
+        String externalId = "google-sub-3";
+        String email = "new@email.com";
+
+        when(userDao.getByExternalId(externalId)).thenReturn(Optional.empty());
+        when(userDao.get(email)).thenReturn(Optional.empty());
+        when(userDao.save(any(User.class))).thenAnswer(invocation -> invocation.getArgument(0));
+
+        User result = userService.createExternalUser(externalId, email);
+
+        verify(userDao).getByExternalId(externalId);
+        verify(userDao).get(email);
+        verify(userDao).save(any(User.class));
+        assertEquals("External id is set", externalId, result.getExternalId());
+        assertEquals("Email is set", email, result.getEmail());
+    }
+
+    @Test
+    public void testCreateExternalUserForAlreadyLinkedEmail() {
+        String externalId = "google-sub-4";
+        String existingExternalId = "google-sub-existing";
+        String email = "existing@email.com";
+
+        when(userDao.getByExternalId(externalId)).thenReturn(Optional.empty());
+        when(userDao.get(email)).thenReturn(Optional.of(user));
+        when(user.getExternalId()).thenReturn(existingExternalId);
+
+        User result = userService.createExternalUser(externalId, email);
+
+        verify(userDao).getByExternalId(externalId);
+        verify(userDao).get(email);
+        verify(userDao, never()).save(any(User.class));
+        assertEquals("Existing linked user is returned", user, result);
     }
 }

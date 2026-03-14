@@ -11,6 +11,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.util.StringUtils;
 
 import java.util.NoSuchElementException;
 
@@ -50,5 +51,35 @@ public class UserServiceImpl implements UserService {
         }
 
         return user;
+    }
+
+    @Override
+    @Transactional
+    public User createExternalUser(String externalId, String email) {
+        return userDao.getByExternalId(externalId)
+                .orElseGet(() -> createOrLinkUserByEmail(externalId, email));
+    }
+
+    private User createOrLinkUserByEmail(String externalId, String email) {
+        User user = resolveUserByEmail(email);
+        if (StringUtils.hasText(user.getExternalId())) {
+            return user;
+        }
+
+        user.setExternalId(externalId);
+        return userDao.save(user);
+    }
+
+    private User resolveUserByEmail(String email) {
+        if (!StringUtils.hasText(email)) {
+            return new User();
+        }
+
+        return userDao.get(email)
+                .orElseGet(() -> {
+                    User newUser = new User();
+                    newUser.setEmail(email);
+                    return newUser;
+                });
     }
 }

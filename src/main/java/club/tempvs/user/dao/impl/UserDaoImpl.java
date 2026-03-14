@@ -23,4 +23,9 @@ public class UserDaoImpl implements UserDao {
     public Optional<User> get(String email) {
         return userRepository.findByEmailIgnoreCase(email);
     }
+
+    @Override
+    public Optional<User> getByExternalId(String externalId) {
+        return userRepository.findByExternalId(externalId);
+    }
 }

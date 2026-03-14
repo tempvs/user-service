@@ -9,4 +9,6 @@ public interface UserDao {
     User save(User user);
 
     Optional<User> get(String email);
+
+    Optional<User> getByExternalId(String externalId);
 }

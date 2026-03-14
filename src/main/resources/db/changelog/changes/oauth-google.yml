@@ -1,0 +1,15 @@
+databaseChangeLog:
+  - changeSet:
+      id: 1772592000000-1
+      author: codex
+      changes:
+        - addColumn:
+            tableName: app_user
+            columns:
+              - column:
+                  name: external_id
+                  type: VARCHAR(255)
+        - addUniqueConstraint:
+            tableName: app_user
+            columnNames: external_id
+            constraintName: UC_APP_USER_EXTERNAL_ID

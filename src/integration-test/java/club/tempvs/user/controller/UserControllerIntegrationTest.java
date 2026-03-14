@@ -7,7 +7,6 @@ import club.tempvs.user.http.EmailHttpClient;
 import club.tempvs.user.repository.EmailVerificationRepository;
 import club.tempvs.user.domain.EmailVerification;
 import club.tempvs.user.repository.UserRepository;
-import io.zonky.test.db.AutoConfigureEmbeddedDatabase;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +28,7 @@ import java.util.Locale;
 import static org.hamcrest.MatcherAssert.assertThat;
 import static org.hamcrest.Matchers.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON_VALUE;
+import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.oauth2Login;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -36,7 +36,6 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 @SpringBootTest
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
-@AutoConfigureEmbeddedDatabase
 @ExtendWith(SpringExtension.class)
 public class UserControllerIntegrationTest {
 
@@ -222,6 +221,21 @@ public class UserControllerIntegrationTest {
                 .header(AUTHORIZATION_HEADER, TOKEN))
                 .andExpect(status().isOk())
                 .andExpect(header().exists(LOGOUT_HEADER));
+    }
+
+    @Test
+    public void testOAuthMe() throws Exception {
+        mvc.perform(get("/oauth/me")
+                        .with(oauth2Login()
+                                .attributes(attrs -> {
+                                    attrs.put("sub", "google-sub-id");
+                                    attrs.put("email", "oauth@email.com");
+                                    attrs.put("name", "OAuth User");
+                                })))
+                .andExpect(status().isOk())
+                .andExpect(jsonPath("$.externalId", is("google-sub-id")))
+                .andExpect(jsonPath("$.email", is("oauth@email.com")))
+                .andExpect(jsonPath("$.name", is("OAuth User")));
     }
 
     private String buildUserInfoValue(Long id) throws Exception {

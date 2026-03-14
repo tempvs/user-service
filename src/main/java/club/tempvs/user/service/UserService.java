@@ -7,4 +7,6 @@ public interface UserService {
     User register(String verificationId, String password);
 
     User login(String email, String password);
+
+    User createExternalUser(String externalId, String email);
 }

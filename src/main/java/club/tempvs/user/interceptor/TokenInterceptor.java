@@ -38,6 +38,10 @@ public class TokenInterceptor implements HandlerInterceptor {
     }
 
     private boolean isSwaggerPath(String path) {
-        return path.contains("/v3/api-docs") || path.contains("swagger-ui");
+        return path.contains("/v3/api-docs")
+                || path.contains("swagger-ui")
+                || path.startsWith("/oauth2/")
+                || path.startsWith("/login/oauth2/")
+                || path.equals("/oauth/me");
     }
 }

@@ -2,11 +2,14 @@ package club.tempvs.user.controller;
 
 import club.tempvs.user.domain.User;
 import club.tempvs.user.dto.CredentialsDto;
+import club.tempvs.user.dto.OAuthMeDto;
 import club.tempvs.user.dto.validation.Scope;
 import club.tempvs.user.service.EmailVerificationService;
 import club.tempvs.user.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.core.convert.ConversionService;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -51,5 +54,13 @@ public class UserController {
     @PostMapping("/logout")
     public void logout(HttpServletResponse response) {
         response.addHeader(LOGOUT_HEADER, "");
+    }
+
+    @GetMapping("/oauth/me")
+    public OAuthMeDto me(@AuthenticationPrincipal OAuth2User principal) {
+        String externalId = principal.getName();
+        String email = principal.getAttribute("email");
+        String name = principal.getAttribute("name");
+        return new OAuthMeDto(externalId, email, name);
     }
 }

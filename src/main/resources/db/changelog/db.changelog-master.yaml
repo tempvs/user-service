@@ -1,3 +1,5 @@
 databaseChangeLog:
   - include:
       file: db/changelog/changes/base.yml
+  - include:
+      file: db/changelog/changes/oauth-google.yml
